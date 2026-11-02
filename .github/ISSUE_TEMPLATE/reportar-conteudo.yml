@@ -1,0 +1,28 @@
+name: Reportar conteúdo
+description: Link quebrado, impróprio ou desinformação em um card do portal.
+title: '[CONTEÚDO]: '
+labels: ['conteudo']
+body:
+  - type: input
+    id: card
+    attributes:
+      label: Título ou link do card afetado
+    validations:
+      required: true
+  - type: dropdown
+    id: motivo
+    attributes:
+      label: Motivo
+      options:
+        - Link quebrado
+        - Conteúdo impróprio
+        - Desinformação
+        - Outro
+    validations:
+      required: true
+  - type: textarea
+    id: detalhes
+    attributes:
+      label: Detalhes
+    validations:
+      required: true

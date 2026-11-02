@@ -1,0 +1,19 @@
+name: Reportar bug
+description: Erro de funcionamento ou de renderização no site.
+title: '[BUG]: '
+labels: ['bug']
+body:
+  - type: textarea
+    id: descricao
+    attributes:
+      label: O que aconteceu?
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+  - type: input
+    id: ambiente
+    attributes:
+      label: Navegador e dispositivo

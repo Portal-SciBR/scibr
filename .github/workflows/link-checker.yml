@@ -1,0 +1,38 @@
+name: Link checker
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check approved card links
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -u
+          curl -sf "$SUPABASE_URL/rest/v1/cards?select=titulo,link_original&status=eq.approved" \
+            -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $SUPABASE_ANON_KEY" > cards.json
+          : > broken.txt
+          jq -r '.[] | [.titulo, .link_original] | @tsv' cards.json | while IFS=$'\t' read -r title url; do
+            code=$(curl -s -o /dev/null -L -m 20 -A "SciBR-LinkChecker" -w '%{http_code}' "$url" || echo 000)
+            if [ "$code" -ge 400 ] || [ "$code" = 000 ]; then echo "- $title ($url) → $code" >> broken.txt; fi
+          done
+          cat broken.txt
+      - name: Open issue if broken links found
+        if: hashFiles('broken.txt') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s broken.txt ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "[CONTEÚDO] Links possivelmente quebrados" \
+              --label conteudo --body-file broken.txt
+          fi
