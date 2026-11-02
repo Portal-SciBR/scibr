@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Enviar nova divulgação
+    url: https://scibr.example.org/enviar
+    about: Novos conteúdos são enviados pelo site, não por Issues ou Pull Requests.
