@@ -3,12 +3,13 @@ import {
   Box,
   Button,
   Pagination,
+  Paper,
   Skeleton,
   Stack,
   Typography,
 } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { CardItem } from '../components/CardItem'
 import { SearchFilters } from '../components/SearchFilters'
 import { fetchTags, searchCards } from '../lib/api'
@@ -72,6 +73,43 @@ export function HomePage() {
           científica.
         </Typography>
       </Box>
+
+      <Paper variant="outlined" sx={{ p: 3 }} component="section">
+        <Typography variant="h6" component="h2" gutterBottom>
+          Como publicar uma divulgação
+        </Typography>
+        <Typography component="ol" sx={{ pl: 3, m: 0 }}>
+          <li>
+            Acesse a página <strong>Enviar</strong> pelo menu ou pelo botão
+            abaixo.
+          </li>
+          <li>
+            Preencha o <strong>título</strong>, um <strong>resumo</strong> de
+            até 500 caracteres, o <strong>link para a fonte</strong> (começando
+            com http:// ou https://), a área, o formato e o idioma.
+          </li>
+          <li>
+            Informe a instituição ou autor e, se quiser, até 8 tags para
+            facilitar a busca.
+          </li>
+          <li>
+            Preencha seu nome e e-mail, indique sua relação com o conteúdo e
+            aceite a Política de Privacidade.
+          </li>
+          <li>
+            Clique em <strong>Enviar para revisão</strong>. Sua divulgação só
+            fica visível depois de aprovada pela equipe.
+          </li>
+        </Typography>
+        <Stack direction="row" spacing={2} sx={{ mt: 2, flexWrap: 'wrap' }}>
+          <Button variant="contained" component={Link} to="/enviar">
+            Enviar divulgação
+          </Button>
+          <Button component={Link} to="/diretrizes">
+            Ver diretrizes de curadoria
+          </Button>
+        </Stack>
+      </Paper>
 
       {!isSupabaseConfigured && (
         <Alert severity="warning">
