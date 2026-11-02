@@ -248,9 +248,10 @@ export function SubmitPage() {
 
         <Divider textAlign="left">Quem está enviando</Divider>
         <Typography variant="body2" color="text.secondary">
-          Não iremos coletar seus dados pessoais. A idéia é viabilizar o contato
-          entre autores e interessados no conteúdo. Em caso de dúvidas, entre em
-          contato pelo e-mail {import.meta.env.VITE_PRIVACY_EMAIL}.
+          Não coletamos dados pessoais. O objetivo desta página é apenas
+          viabilizar o contato entre autores e leitores interessados no
+          conteúdo. Em caso de dúvidas, entre em contato pelo e-mail{' '}
+          {import.meta.env.VITE_PRIVACY_EMAIL}.
         </Typography>
         <TextField
           label="Seu nome"
