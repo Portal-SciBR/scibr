@@ -78,6 +78,31 @@ export function HomePage() {
         <Typography color="text.secondary">{t('home.subtitle')}</Typography>
       </Box>
 
+      <Paper
+        variant="outlined"
+        component="aside"
+        aria-labelledby="home-submission-note-title"
+        sx={{
+          p: 2,
+          borderLeft: 4,
+          borderLeftColor: 'primary.main',
+          bgcolor: 'action.hover',
+        }}
+      >
+        <Typography
+          id="home-submission-note-title"
+          variant="h6"
+          component="h2"
+          gutterBottom
+          sx={{ fontWeight: 700 }}
+        >
+          {t('home.submissionNoteTitle')}
+        </Typography>
+        <Typography color="text.secondary">
+          {t('home.submissionNote')}
+        </Typography>
+      </Paper>
+
       <Paper variant="outlined" sx={{ p: 3 }} component="section">
         <Typography variant="h6" component="h2" gutterBottom>
           {t('home.howToTitle')}

@@ -22,7 +22,9 @@
   },
   "home": {
     "title": "Ciência num só lugar",
-    "subtitle": "Diretório aberto de artigos, podcasts, canais e portais de divulgação científica.",
+    "subtitle": "Diretório aberto de conteúdos e recomendações sobre ciência: artigos, vídeos, podcasts, canais e portais.",
+    "submissionNoteTitle": "O que vale como indicação?",
+    "submissionNote": "Não precisa ser artigo científico nem conteúdo seu: vale indicar uma leitura, vídeo, canal, portal ou outro recurso de ciência que você considere útil. Toda sugestão passa por curadoria antes de ser publicada.",
     "howToTitle": "Como publicar uma divulgação",
     "step1": "Acesse a página Enviar pelo menu ou pelo botão abaixo.",
     "step2": "Preencha o título, um resumo de até 500 caracteres, o link para a fonte (começando com http:// ou https://), a área, o formato e o idioma.",
