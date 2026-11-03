@@ -89,12 +89,51 @@ export function HomePage() {
           <li>{t('home.step4')}</li>
           <li>{t('home.step5')}</li>
         </Typography>
-        <Stack direction="row" spacing={2} sx={{ mt: 2, flexWrap: 'wrap' }}>
-          <Button variant="contained" component={Link} to="/enviar">
-            {t('home.submitResource')}
+        <Stack
+          direction="row"
+          sx={{
+            mt: 2,
+            flexWrap: 'nowrap',
+            alignItems: 'center',
+            columnGap: { xs: 0.5, sm: 2 },
+          }}
+        >
+          <Button
+            variant="contained"
+            component={Link}
+            to="/enviar"
+            sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+          >
+            <Box
+              component="span"
+              sx={{ display: { xs: 'none', sm: 'inline' } }}
+            >
+              {t('home.submitResource')}
+            </Box>
+            <Box
+              component="span"
+              sx={{ display: { xs: 'inline', sm: 'none' } }}
+            >
+              {t('home.submitResourceShort')}
+            </Box>
           </Button>
-          <Button component={Link} to="/diretrizes">
-            {t('home.viewGuidelines')}
+          <Button
+            component={Link}
+            to="/diretrizes"
+            sx={{ whiteSpace: 'nowrap', minWidth: 0, px: { xs: 0.75, sm: 2 } }}
+          >
+            <Box
+              component="span"
+              sx={{ display: { xs: 'none', sm: 'inline' } }}
+            >
+              {t('home.viewGuidelines')}
+            </Box>
+            <Box
+              component="span"
+              sx={{ display: { xs: 'inline', sm: 'none' } }}
+            >
+              {t('home.viewGuidelinesShort')}
+            </Box>
           </Button>
         </Stack>
       </Paper>
