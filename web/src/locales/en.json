@@ -22,7 +22,9 @@
   },
   "home": {
     "title": "Science, all in one place",
-    "subtitle": "An open directory of scientific articles, podcasts, channels, and outreach websites.",
+    "subtitle": "An open directory of science-related content and recommendations: articles, videos, podcasts, channels, and websites.",
+    "submissionNoteTitle": "What can I recommend?",
+    "submissionNote": "It does not have to be a scientific paper or your own work: recommend a reading, video, channel, website, or any other science resource you find useful. Every suggestion is reviewed before publication.",
     "howToTitle": "How to submit a resource",
     "step1": "Open the Submit page from the menu or the button below.",
     "step2": "Enter a title, a summary of up to 500 characters, the source link (starting with http:// or https://), the subject area, format, and content language.",
