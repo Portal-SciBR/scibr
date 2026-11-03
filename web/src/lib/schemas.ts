@@ -1,31 +1,37 @@
 import { z } from 'zod'
 import { AREAS, FORMATOS } from './types'
 
-export const submissionSchema = z.object({
-  titulo: z
-    .string()
-    .trim()
-    .min(3, 'Mínimo de 3 caracteres')
-    .max(120, 'Máximo de 120 caracteres'),
-  descricao: z
-    .string()
-    .trim()
-    .min(10, 'Escreva ao menos 10 caracteres')
-    .max(500, 'Máximo de 500 caracteres'),
-  area: z.enum(AREAS, { error: 'Selecione uma área' }),
-  formato: z.enum(FORMATOS, { error: 'Selecione um formato' }),
-  instituicao_autor: z.string().trim().max(120, 'Máximo de 120 caracteres'),
-  tags: z.array(z.string().trim().min(1).max(30)).max(8, 'Máximo de 8 tags'),
-  link_original: z
-    .string()
-    .trim()
-    .max(500)
-    .regex(
-      /^https?:\/\/[^\s]+$/i,
-      'Informe um link válido começando com http:// ou https://',
-    ),
-  idioma: z.string().regex(/^[a-z]{2}(-[A-Z]{2})?$/, 'Idioma inválido'),
-})
+type Translate = (key: string) => string
+
+export const submissionSchemaFor = (t: Translate) =>
+  z.object({
+    titulo: z
+      .string()
+      .trim()
+      .min(3, t('validation.min3'))
+      .max(120, t('validation.max120')),
+    descricao: z
+      .string()
+      .trim()
+      .min(10, t('validation.min10'))
+      .max(500, t('validation.max500')),
+    area: z.enum(AREAS, { error: t('validation.selectArea') }),
+    formato: z.enum(FORMATOS, { error: t('validation.selectFormat') }),
+    instituicao_autor: z.string().trim().max(120, t('validation.max120')),
+    tags: z
+      .array(z.string().trim().min(1).max(30))
+      .max(8, t('validation.max8')),
+    link_original: z
+      .string()
+      .trim()
+      .max(500)
+      .regex(/^https?:\/\/[^\s]+$/i, t('validation.validLink')),
+    idioma: z
+      .string()
+      .regex(/^[a-z]{2}(-[A-Z]{2})?$/, t('validation.invalidLanguage')),
+  })
+
+export const submissionSchema = submissionSchemaFor((key) => key)
 
 export type SubmissionInput = z.infer<typeof submissionSchema>
 
@@ -38,27 +44,48 @@ export const RELACOES = [
 const optional = (re: RegExp, message: string) =>
   z.union([z.literal(''), z.string().trim().regex(re, message)])
 
-export const enviadorSchema = z.object({
-  enviador_nome: z
-    .string()
-    .trim()
-    .min(2, 'Informe seu nome')
-    .max(100, 'Máximo de 100 caracteres'),
-  enviador_email: z
-    .string()
-    .trim()
-    .max(150)
-    .regex(/^[^@\s]+@[^@\s]+\.[^@\s]+$/, 'Informe um e-mail válido'),
-  enviador_relacao: z.enum(['autor', 'instituicao', 'indicacao'], {
-    error: 'Selecione sua relação com o conteúdo',
-  }),
-  enviador_telefone: optional(/^\+?[0-9 ()-]{8,20}$/, 'Telefone inválido'),
-  enviador_instagram: optional(/^[A-Za-z0-9._]{1,30}$/, 'Usuário inválido'),
-  enviador_x: optional(/^[A-Za-z0-9_]{1,15}$/, 'Usuário inválido'),
-  enviador_youtube: optional(/^https:\/\/[^\s]+$/i, 'Link https inválido'),
-  enviador_linkedin: optional(/^https:\/\/[^\s]+$/i, 'Link https inválido'),
-  enviador_site: optional(/^https?:\/\/[^\s]+$/i, 'Link inválido'),
-})
+export const enviadorSchemaFor = (t: Translate) =>
+  z.object({
+    enviador_nome: z
+      .string()
+      .trim()
+      .min(2, t('validation.yourName'))
+      .max(100, t('validation.max100')),
+    enviador_email: z
+      .string()
+      .trim()
+      .max(150)
+      .regex(/^[^@\s]+@[^@\s]+\.[^@\s]+$/, t('validation.validEmail')),
+    enviador_relacao: z.enum(['autor', 'instituicao', 'indicacao'], {
+      error: t('validation.selectRelationship'),
+    }),
+    enviador_telefone: optional(
+      /^\+?[0-9 ()-]{8,20}$/,
+      t('validation.invalidPhone'),
+    ),
+    enviador_instagram: optional(
+      /^[A-Za-z0-9._]{1,30}$/,
+      t('validation.invalidUsername'),
+    ),
+    enviador_x: optional(
+      /^[A-Za-z0-9_]{1,15}$/,
+      t('validation.invalidUsername'),
+    ),
+    enviador_youtube: optional(
+      /^https:\/\/[^\s]+$/i,
+      t('validation.httpsLink'),
+    ),
+    enviador_linkedin: optional(
+      /^https:\/\/[^\s]+$/i,
+      t('validation.httpsLink'),
+    ),
+    enviador_site: optional(
+      /^https?:\/\/[^\s]+$/i,
+      t('validation.invalidLink'),
+    ),
+  })
+
+export const enviadorSchema = enviadorSchemaFor((key) => key)
 
 export type EnviadorInput = z.infer<typeof enviadorSchema>
 

@@ -15,34 +15,36 @@ import {
   Typography,
 } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
-import { submitCard } from '../lib/api'
+import { ApiError, submitCard } from '../lib/api'
 import {
   RELACOES,
-  enviadorSchema,
+  enviadorSchemaFor,
   parseTags,
   stripAt,
-  submissionSchema,
+  submissionSchemaFor,
   withHttps,
 } from '../lib/schemas'
 import { AREAS, FORMATOS, IDIOMAS } from '../lib/types'
 
-const formSchema = submissionSchema
-  .omit({ tags: true })
-  .extend(enviadorSchema.shape)
-  .extend({
-    tagsRaw: z
-      .string()
-      .refine((v) => parseTags(v).length <= 8, 'Máximo de 8 tags'),
-    consentimento: z.literal(true, {
-      error: 'É preciso concordar para enviar',
-    }),
-    website: z.string().max(0),
-  })
+const createFormSchema = (t: (key: string) => string) =>
+  submissionSchemaFor(t)
+    .omit({ tags: true })
+    .extend(enviadorSchemaFor(t).shape)
+    .extend({
+      tagsRaw: z
+        .string()
+        .refine((v) => parseTags(v).length <= 8, t('validation.max8')),
+      consentimento: z.literal(true, {
+        error: t('validation.consentRequired'),
+      }),
+      website: z.string().max(0),
+    })
 
-type FormValues = z.input<typeof formSchema>
+type FormValues = z.input<ReturnType<typeof createFormSchema>>
 
 const COOLDOWN_KEY = 'scibr:last-submit'
 const COOLDOWN_MS = 30_000
@@ -70,6 +72,8 @@ const defaults: FormValues = {
 }
 
 export function SubmitPage() {
+  const { t } = useTranslation()
+  const formSchema = createFormSchema(t)
   // Normaliza @usuario e links sem https antes de validar.
   const normalize = (v: FormValues): FormValues => ({
     ...v,
@@ -91,14 +95,13 @@ export function SubmitPage() {
     resolver: (values, ctx, opts) => baseResolver(normalize(values), ctx, opts),
     defaultValues: defaults,
   })
+  const summaryLength = useWatch({ control, name: 'descricao' })?.length ?? 0
 
   const mutation = useMutation({
     mutationFn: async (v: z.output<typeof formSchema>) => {
       const last = Number(localStorage.getItem(COOLDOWN_KEY) ?? 0)
       if (Date.now() - last < COOLDOWN_MS) {
-        throw new Error(
-          'Aguarde alguns segundos antes de enviar outra divulgação.',
-        )
+        throw new Error(t('submit.cooldown'))
       }
       // Honeypot preenchido: finge sucesso sem gravar.
       if (v.website) return
@@ -121,22 +124,20 @@ export function SubmitPage() {
     <Stack spacing={3} sx={{ maxWidth: 720, mx: 'auto' }}>
       <Box>
         <Typography variant="h4" component="h1" gutterBottom>
-          Enviar divulgação
+          {t('submit.title')}
         </Typography>
-        <Typography color="text.secondary">
-          Qualquer pessoa pode sugerir um conteúdo. Ele ficará visível após
-          revisão da equipe. Não hospedamos o material: apenas direcionamos para
-          a fonte original.
-        </Typography>
+        <Typography color="text.secondary">{t('submit.intro')}</Typography>
       </Box>
 
       {mutation.isSuccess && (
-        <Alert severity="success">
-          Recebido! Sua divulgação será revisada antes de ser publicada.
-        </Alert>
+        <Alert severity="success">{t('submit.success')}</Alert>
       )}
       {mutation.isError && (
-        <Alert severity="error">{mutation.error.message}</Alert>
+        <Alert severity="error">
+          {mutation.error instanceof ApiError
+            ? t(`errors.${mutation.error.code}`)
+            : mutation.error.message}
+        </Alert>
       )}
 
       <Stack
@@ -146,23 +147,28 @@ export function SubmitPage() {
         onSubmit={handleSubmit((v) => mutation.mutate(v))}
       >
         <TextField
-          label="Título"
+          label={t('submit.titleField')}
           required
           {...register('titulo')}
           error={!!errors.titulo}
           helperText={errors.titulo?.message}
         />
         <TextField
-          label="Resumo"
+          label={t('submit.summary')}
           required
           multiline
           minRows={3}
           {...register('descricao')}
           error={!!errors.descricao}
-          helperText={errors.descricao?.message ?? 'Até 500 caracteres.'}
+          helperText={[
+            errors.descricao?.message,
+            t('submit.summaryHelp', { count: summaryLength }),
+          ]
+            .filter(Boolean)
+            .join(' · ')}
         />
         <TextField
-          label="Link para a fonte"
+          label={t('submit.sourceLink')}
           required
           type="url"
           placeholder="https://…"
@@ -177,14 +183,14 @@ export function SubmitPage() {
             <TextField
               select
               required
-              label="Área do conhecimento"
+              label={t('submit.area')}
               {...field}
               error={!!errors.area}
               helperText={errors.area?.message}
             >
               {AREAS.map((a) => (
                 <MenuItem key={a} value={a}>
-                  {a}
+                  {t(`domain.areas.${a}`)}
                 </MenuItem>
               ))}
             </TextField>
@@ -197,14 +203,14 @@ export function SubmitPage() {
             <TextField
               select
               required
-              label="Formato"
+              label={t('submit.format')}
               {...field}
               error={!!errors.formato}
               helperText={errors.formato?.message}
             >
               {FORMATOS.map((f) => (
                 <MenuItem key={f} value={f}>
-                  {f}
+                  {t(`domain.formats.${f}`)}
                 </MenuItem>
               ))}
             </TextField>
@@ -214,28 +220,26 @@ export function SubmitPage() {
           name="idioma"
           control={control}
           render={({ field }) => (
-            <TextField select label="Idioma" {...field}>
+            <TextField select label={t('submit.language')} {...field}>
               {IDIOMAS.map((i) => (
                 <MenuItem key={i.value} value={i.value}>
-                  {i.label}
+                  {t(`domain.languages.${i.value}`)}
                 </MenuItem>
               ))}
             </TextField>
           )}
         />
         <TextField
-          label="Instituição ou autor"
+          label={t('submit.institutionAuthor')}
           {...register('instituicao_autor')}
           error={!!errors.instituicao_autor}
           helperText={errors.instituicao_autor?.message}
         />
         <TextField
-          label="Tags"
+          label={t('submit.tags')}
           {...register('tagsRaw')}
           error={!!errors.tagsRaw}
-          helperText={
-            errors.tagsRaw?.message ?? 'Separe por vírgula. Máximo de 8.'
-          }
+          helperText={errors.tagsRaw?.message ?? t('submit.tagsHelp')}
         />
         <input
           type="text"
@@ -246,15 +250,12 @@ export function SubmitPage() {
           {...register('website')}
         />
 
-        <Divider textAlign="left">Quem está enviando</Divider>
+        <Divider textAlign="left">{t('submit.submitterHeading')}</Divider>
         <Typography variant="body2" color="text.secondary">
-          Não coletamos dados pessoais. O objetivo desta página é apenas
-          viabilizar o contato entre autores e leitores interessados no
-          conteúdo. Em caso de dúvidas, entre em contato pelo e-mail{' '}
-          {import.meta.env.VITE_PRIVACY_EMAIL}.
+          {t('submit.submitterIntro')} {import.meta.env.VITE_PRIVACY_EMAIL}.
         </Typography>
         <TextField
-          label="Seu nome"
+          label={t('submit.yourName')}
           required
           autoComplete="name"
           {...register('enviador_nome')}
@@ -262,7 +263,7 @@ export function SubmitPage() {
           helperText={errors.enviador_nome?.message}
         />
         <TextField
-          label="Seu e-mail"
+          label={t('submit.yourEmail')}
           required
           type="email"
           autoComplete="email"
@@ -277,21 +278,21 @@ export function SubmitPage() {
             <TextField
               select
               required
-              label="Sua relação com o conteúdo"
+              label={t('submit.relationship')}
               {...field}
               error={!!errors.enviador_relacao}
               helperText={errors.enviador_relacao?.message}
             >
               {RELACOES.map((r) => (
                 <MenuItem key={r.value} value={r.value}>
-                  {r.label}
+                  {t(`domain.relations.${r.value}`)}
                 </MenuItem>
               ))}
             </TextField>
           )}
         />
         <Typography variant="body2" color="text.secondary">
-          Contatos e redes (opcionais) para divulgação do trabalho:
+          {t('submit.optionalContacts')}
         </Typography>
         <Box
           sx={{
@@ -301,7 +302,7 @@ export function SubmitPage() {
           }}
         >
           <TextField
-            label="Telefone/WhatsApp"
+            label={t('submit.phone')}
             type="tel"
             autoComplete="tel"
             {...register('enviador_telefone')}
@@ -337,7 +338,7 @@ export function SubmitPage() {
             helperText={errors.enviador_linkedin?.message}
           />
           <TextField
-            label="Site ou Lattes"
+            label={t('submit.site')}
             placeholder="https://…"
             {...register('enviador_site')}
             error={!!errors.enviador_site}
@@ -349,18 +350,16 @@ export function SubmitPage() {
             control={<Checkbox {...register('consentimento')} />}
             label={
               <>
-                Li e concordo com a{' '}
+                {t('submit.consentPrefix')}{' '}
                 <MuiLink
                   component={Link}
                   to="/privacidade"
                   target="_blank"
                   rel="noopener"
                 >
-                  Política de Privacidade
+                  {t('submit.privacyPolicy')}
                 </MuiLink>
-                . Autorizo a exibição pública do meu nome e das redes/site
-                informados, e que meu e-mail e telefone sejam mostrados a
-                visitantes que clicarem para ver o contato.
+                . {t('submit.consentSuffix')}
               </>
             }
           />
@@ -374,7 +373,9 @@ export function SubmitPage() {
           size="large"
           disabled={mutation.isPending}
         >
-          {mutation.isPending ? 'Enviando…' : 'Enviar para revisão'}
+          {mutation.isPending
+            ? t('submit.sending')
+            : t('submit.submitForReview')}
         </Button>
       </Stack>
     </Stack>

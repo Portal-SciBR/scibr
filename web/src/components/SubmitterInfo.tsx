@@ -14,7 +14,8 @@ import {
   Typography,
 } from '@mui/material'
 import { useState, type ReactNode } from 'react'
-import { revealContact, type RevealedContact } from '../lib/api'
+import { useTranslation } from 'react-i18next'
+import { ApiError, revealContact, type RevealedContact } from '../lib/api'
 import { RELACOES } from '../lib/schemas'
 import type { PublicEnviador } from '../lib/types'
 
@@ -24,7 +25,7 @@ interface ContactLink {
   icon: ReactNode
 }
 
-function socialLinks(e: PublicEnviador): ContactLink[] {
+function socialLinks(e: PublicEnviador, siteLabel: string): ContactLink[] {
   const links: ContactLink[] = []
   if (e.enviador_instagram)
     links.push({
@@ -52,7 +53,7 @@ function socialLinks(e: PublicEnviador): ContactLink[] {
     })
   if (e.enviador_site && /^https?:\/\//.test(e.enviador_site))
     links.push({
-      label: 'Site ou Lattes',
+      label: siteLabel,
       href: e.enviador_site,
       icon: <LanguageIcon fontSize="small" />,
     })
@@ -66,10 +67,11 @@ function PrivateContact({
   contact: RevealedContact
   name: string
 }) {
+  const { t } = useTranslation()
   if (!contact.email && !contact.telefone)
     return (
       <Typography variant="caption" color="text.secondary">
-        Contato direto não disponível.
+        {t('submitter.contactUnavailable')}
       </Typography>
     )
   return (
@@ -80,7 +82,7 @@ function PrivateContact({
           <MuiLink
             href={`mailto:${contact.email}`}
             variant="body2"
-            aria-label={`E-mail de ${name}`}
+            aria-label={t('submitter.emailAria', { name })}
           >
             {contact.email}
           </MuiLink>
@@ -92,7 +94,7 @@ function PrivateContact({
           <MuiLink
             href={`tel:${contact.telefone.replace(/[^0-9+]/g, '')}`}
             variant="body2"
-            aria-label={`Telefone de ${name}`}
+            aria-label={t('submitter.phoneAria', { name })}
           >
             {contact.telefone}
           </MuiLink>
@@ -110,6 +112,7 @@ interface Props {
 }
 
 export function SubmitterInfo({ enviador, cardId, contact }: Props) {
+  const { t } = useTranslation()
   const [revealed, setRevealed] = useState<RevealedContact | null>(
     contact ?? null,
   )
@@ -119,7 +122,7 @@ export function SubmitterInfo({ enviador, cardId, contact }: Props) {
   if (!enviador.enviador_nome) return null
   const name = enviador.enviador_nome
   const relacao = RELACOES.find((r) => r.value === enviador.enviador_relacao)
-  const links = socialLinks(enviador)
+  const links = socialLinks(enviador, t('submit.site'))
 
   const reveal = async () => {
     setBusy(true)
@@ -127,7 +130,13 @@ export function SubmitterInfo({ enviador, cardId, contact }: Props) {
     try {
       setRevealed(await revealContact(cardId))
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao obter contato.')
+      setError(
+        e instanceof ApiError
+          ? t(`errors.${e.code}`)
+          : e instanceof Error
+            ? e.message
+            : t('submitter.contactError'),
+      )
     } finally {
       setBusy(false)
     }
@@ -136,8 +145,8 @@ export function SubmitterInfo({ enviador, cardId, contact }: Props) {
   return (
     <Stack spacing={0.5} sx={{ mt: 2 }}>
       <Typography variant="caption" color="text.secondary">
-        Enviado por <strong>{name}</strong>
-        {relacao && ` · ${relacao.label}`}
+        {t('submitter.sentBy')} <strong>{name}</strong>
+        {relacao && ` · ${t(`domain.relations.${relacao.value}`)}`}
       </Typography>
       {links.length > 0 && (
         <Stack direction="row" sx={{ flexWrap: 'wrap', ml: -0.75 }}>
@@ -148,7 +157,10 @@ export function SubmitterInfo({ enviador, cardId, contact }: Props) {
                 href={l.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`${l.label} de ${name}`}
+                aria-label={t('submitter.socialAria', {
+                  label: l.label,
+                  name,
+                })}
               >
                 {l.icon}
               </IconButton>
@@ -165,7 +177,7 @@ export function SubmitterInfo({ enviador, cardId, contact }: Props) {
           disabled={busy}
           sx={{ alignSelf: 'flex-start' }}
         >
-          {busy ? 'Carregando…' : 'Mostrar e-mail e telefone'}
+          {busy ? t('submitter.loading') : t('submitter.showContact')}
         </Button>
       )}
       {error && (

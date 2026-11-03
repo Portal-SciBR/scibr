@@ -1,33 +1,26 @@
 import { Link as MuiLink, Stack, Typography } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 
 export function AboutPage() {
+  const { t } = useTranslation()
   return (
     <Stack spacing={2} sx={{ maxWidth: 720, mx: 'auto' }}>
       <Typography variant="h4" component="h1">
-        Sobre o Portal SciBR
+        {t('about.title')}
       </Typography>
-      <Typography>
-        O Portal SciBR é uma iniciativa open-source dedicada a mapear, catalogar
-        e centralizar projetos, conteúdos e iniciativas de divulgação científica
-        em todo o Brasil.
-      </Typography>
-      <Typography>
-        Atuamos como diretório aberto: não hospedamos o conteúdo original,
-        apenas facilitamos sua descoberta por meio de busca e filtros por área
-        do conhecimento, formato e tema, direcionando o público para os
-        criadores e pesquisadores.
-      </Typography>
+      <Typography>{t('about.intro')}</Typography>
+      <Typography>{t('about.directory')}</Typography>
       <Typography variant="h6" component="h2">
-        Encontrou algo errado?
+        {t('about.issueTitle')}
       </Typography>
       <Typography>
-        Para reportar um link quebrado, impróprio ou desinformação, abra uma{' '}
+        {t('about.report')}{' '}
         <MuiLink
           href="https://github.com/Portal-SciBR/scibr/issues/new?template=reportar-conteudo.yml"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Issue de conteúdo
+          {t('about.issueLink')}
         </MuiLink>
         .
       </Typography>
@@ -36,28 +29,20 @@ export function AboutPage() {
 }
 
 export function GuidelinesPage() {
+  const { t } = useTranslation()
   return (
     <Stack spacing={2} sx={{ maxWidth: 720, mx: 'auto' }}>
       <Typography variant="h4" component="h1">
-        Diretrizes de curadoria
+        {t('guidelines.title')}
       </Typography>
-      <Typography>Para ser publicada, uma divulgação precisa:</Typography>
+      <Typography>{t('guidelines.intro')}</Typography>
       <Typography component="ul" sx={{ pl: 3 }}>
-        <li>apontar para uma fonte pública e verificável;</li>
-        <li>
-          ter relação com ciência e divulgação científica produzida ou voltada
-          ao Brasil;
-        </li>
-        <li>
-          basear-se em evidências, sem promover desinformação ou pseudociência;
-        </li>
-        <li>
-          não ter caráter de spam, publicidade enganosa ou conteúdo impróprio.
-        </li>
+        <li>{t('guidelines.publicSource')}</li>
+        <li>{t('guidelines.brazilRelation')}</li>
+        <li>{t('guidelines.evidence')}</li>
+        <li>{t('guidelines.appropriate')}</li>
       </Typography>
-      <Typography color="text.secondary">
-        Todo envio passa por revisão da equipe antes de ficar visível no portal.
-      </Typography>
+      <Typography color="text.secondary">{t('guidelines.review')}</Typography>
     </Stack>
   )
 }

@@ -11,9 +11,10 @@ import {
   useTheme,
 } from '@mui/material'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   parseTags,
-  submissionSchema,
+  submissionSchemaFor,
   type SubmissionInput,
 } from '../lib/schemas'
 import { AREAS, FORMATOS, type AdminCard } from '../lib/types'
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function EditCardDialog({ card, onClose, onSave }: Props) {
+  const { t } = useTranslation()
   const [form, setForm] = useState({
     titulo: card.titulo,
     descricao: card.descricao,
@@ -40,7 +42,7 @@ export function EditCardDialog({ card, onClose, onSave }: Props) {
 
   const save = () => {
     const { tagsRaw, ...rest } = form
-    const parsed = submissionSchema.safeParse({
+    const parsed = submissionSchemaFor(t).safeParse({
       ...rest,
       tags: parseTags(tagsRaw),
     })
@@ -65,57 +67,57 @@ export function EditCardDialog({ card, onClose, onSave }: Props) {
       maxWidth="sm"
       fullScreen={fullScreen}
     >
-      <DialogTitle>Editar divulgação</DialogTitle>
+      <DialogTitle>{t('editDialog.title')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
           <TextField
-            label="Título"
+            label={t('editDialog.titleField')}
             value={form.titulo}
             onChange={set('titulo')}
           />
           <TextField
-            label="Resumo"
+            label={t('editDialog.summary')}
             multiline
             minRows={3}
             value={form.descricao}
             onChange={set('descricao')}
           />
           <TextField
-            label="Link"
+            label={t('editDialog.link')}
             value={form.link_original}
             onChange={set('link_original')}
           />
           <TextField
             select
-            label="Área"
+            label={t('editDialog.area')}
             value={form.area}
             onChange={set('area')}
           >
             {AREAS.map((a) => (
               <MenuItem key={a} value={a}>
-                {a}
+                {t(`domain.areas.${a}`)}
               </MenuItem>
             ))}
           </TextField>
           <TextField
             select
-            label="Formato"
+            label={t('editDialog.format')}
             value={form.formato}
             onChange={set('formato')}
           >
             {FORMATOS.map((f) => (
               <MenuItem key={f} value={f}>
-                {f}
+                {t(`domain.formats.${f}`)}
               </MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Instituição ou autor"
+            label={t('editDialog.institutionAuthor')}
             value={form.instituicao_autor}
             onChange={set('instituicao_autor')}
           />
           <TextField
-            label="Tags (vírgula)"
+            label={t('editDialog.tags')}
             value={form.tagsRaw}
             onChange={set('tagsRaw')}
             error={!!error}
@@ -124,9 +126,9 @@ export function EditCardDialog({ card, onClose, onSave }: Props) {
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={onClose}>{t('editDialog.cancel')}</Button>
         <Button variant="contained" onClick={save}>
-          Salvar
+          {t('editDialog.save')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -11,6 +11,7 @@ import {
 } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { AdminLogin } from '../admin/AdminLogin'
 import { EditCardDialog } from '../admin/EditCardDialog'
@@ -28,26 +29,21 @@ import type { AdminCard, Status } from '../lib/types'
 import { SubmitterInfo } from '../components/SubmitterInfo'
 
 type TabValue = Status | 'all'
-const TABS: { value: TabValue; label: string }[] = [
-  { value: 'pending', label: 'Pendentes' },
-  { value: 'approved', label: 'Aprovados' },
-  { value: 'rejected', label: 'Rejeitados' },
-  { value: 'all', label: 'Todos' },
-]
 
 export function AdminPage() {
+  const { t } = useTranslation()
   const { loading, session, isAdmin } = useAdminAuth()
   if (loading) return null
   if (!session) return <AdminLogin />
   if (!isAdmin) {
     return (
       <Stack spacing={2} sx={{ maxWidth: 480, mx: 'auto' }}>
-        <Alert severity="error">
-          Esta conta não tem permissão de moderação.
-        </Alert>
-        <Button onClick={() => supabase.auth.signOut()}>Sair</Button>
+        <Alert severity="error">{t('moderation.noPermission')}</Alert>
+        <Button onClick={() => supabase.auth.signOut()}>
+          {t('moderation.signOut')}
+        </Button>
         <Button component={Link} to="/">
-          Voltar ao site
+          {t('moderation.backToSite')}
         </Button>
       </Stack>
     )
@@ -56,11 +52,18 @@ export function AdminPage() {
 }
 
 function Moderation({ userId }: { userId: string }) {
+  const { t, i18n } = useTranslation()
   const qc = useQueryClient()
   const [tab, setTab] = useState<TabValue>('pending')
   const [search, setSearch] = useState('')
   const q = useDebounced(search)
   const [editing, setEditing] = useState<AdminCard | null>(null)
+  const tabs: { value: TabValue; label: string }[] = [
+    { value: 'pending', label: t('moderation.pending') },
+    { value: 'approved', label: t('moderation.approved') },
+    { value: 'rejected', label: t('moderation.rejected') },
+    { value: 'all', label: t('moderation.all') },
+  ]
 
   const list = useQuery({
     queryKey: ['admin-cards', tab, q],
@@ -111,31 +114,33 @@ function Moderation({ userId }: { userId: string }) {
         }}
       >
         <Typography variant="h4" component="h1">
-          Moderação
+          {t('adminLogin.title')}
         </Typography>
         <Stack direction="row" spacing={1}>
           <Button component={Link} to="/">
-            Voltar ao site
+            {t('moderation.backToSite')}
           </Button>
-          <Button onClick={() => supabase.auth.signOut()}>Sair</Button>
+          <Button onClick={() => supabase.auth.signOut()}>
+            {t('moderation.signOut')}
+          </Button>
         </Stack>
       </Stack>
       <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable">
-        {TABS.map((t) => (
-          <Tab key={t.value} value={t.value} label={t.label} />
+        {tabs.map((tab) => (
+          <Tab key={tab.value} value={tab.value} label={tab.label} />
         ))}
       </Tabs>
       <TextField
         size="small"
         type="search"
-        label="Buscar por título ou link"
+        label={t('moderation.search')}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      {error && (
-        <Alert severity="error">Ocorreu um erro. Tente novamente.</Alert>
+      {error && <Alert severity="error">{t('moderation.error')}</Alert>}
+      {list.data?.length === 0 && (
+        <Alert severity="info">{t('moderation.empty')}</Alert>
       )}
-      {list.data?.length === 0 && <Alert severity="info">Nada por aqui.</Alert>}
       {list.data?.map((c) => (
         <Box
           key={c.id}
@@ -144,7 +149,7 @@ function Moderation({ userId }: { userId: string }) {
           <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
             <Chip
               size="small"
-              label={c.status}
+              label={t(`moderation.${c.status}`)}
               color={
                 c.status === 'approved'
                   ? 'success'
@@ -153,8 +158,16 @@ function Moderation({ userId }: { userId: string }) {
                     : 'warning'
               }
             />
-            <Chip size="small" variant="outlined" label={c.area} />
-            <Chip size="small" variant="outlined" label={c.formato} />
+            <Chip
+              size="small"
+              variant="outlined"
+              label={t(`domain.areas.${c.area}`)}
+            />
+            <Chip
+              size="small"
+              variant="outlined"
+              label={t(`domain.formats.${c.formato}`)}
+            />
           </Stack>
           <Typography variant="h6" component="h2">
             {c.titulo}
@@ -174,9 +187,12 @@ function Moderation({ userId }: { userId: string }) {
           />
           {c.consentimento_em && (
             <Typography variant="caption" color="text.secondary">
-              Consentimento em{' '}
-              {new Date(c.consentimento_em).toLocaleString('pt-BR')} (política{' '}
-              {c.consentimento_versao})
+              {t('moderation.consentDate', {
+                date: new Date(c.consentimento_em).toLocaleString(
+                  i18n.language,
+                ),
+                version: c.consentimento_versao,
+              })}
             </Typography>
           )}
           <Stack
@@ -190,7 +206,7 @@ function Moderation({ userId }: { userId: string }) {
                 variant="contained"
                 onClick={() => review.mutate({ id: c.id, status: 'approved' })}
               >
-                Aprovar
+                {t('moderation.approve')}
               </Button>
             )}
             {c.status !== 'rejected' && (
@@ -199,34 +215,33 @@ function Moderation({ userId }: { userId: string }) {
                 color="warning"
                 onClick={() => review.mutate({ id: c.id, status: 'rejected' })}
               >
-                Rejeitar
+                {t('moderation.reject')}
               </Button>
             )}
             <Button size="small" onClick={() => setEditing(c)}>
-              Editar
+              {t('moderation.edit')}
             </Button>
             {c.enviador_nome && (
               <Button
                 size="small"
                 color="warning"
                 onClick={() =>
-                  window.confirm(
-                    'Apagar nome, e-mail, telefone e redes do enviador? O card é mantido.',
-                  ) && clearData.mutate(c.id)
+                  window.confirm(t('moderation.confirmClearSubmitterData')) &&
+                  clearData.mutate(c.id)
                 }
               >
-                Apagar dados do enviador
+                {t('moderation.clearSubmitterData')}
               </Button>
             )}
             <Button
               size="small"
               color="error"
               onClick={() =>
-                window.confirm('Excluir definitivamente?') &&
+                window.confirm(t('moderation.confirmDelete')) &&
                 remove.mutate(c.id)
               }
             >
-              Excluir
+              {t('moderation.delete')}
             </Button>
           </Stack>
         </Box>
