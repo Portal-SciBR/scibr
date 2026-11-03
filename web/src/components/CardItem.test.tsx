@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import i18n from '../i18n'
 import type { Card } from '../lib/types'
 import { CardItem } from './CardItem'
 
@@ -60,5 +61,22 @@ describe('CardItem', () => {
     expect(
       screen.getByRole('button', { name: /mostrar e-mail e telefone/i }),
     ).toBeInTheDocument()
+  })
+
+  it('updates visible labels when the language changes', async () => {
+    await act(async () => {
+      await i18n.changeLanguage('en')
+    })
+
+    render(<CardItem card={base} />)
+
+    expect(screen.getByText('Physical Sciences & Earth')).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', {
+        name: 'Visit source: Astronomia em Ação',
+      }),
+    ).toBeInTheDocument()
+    expect(document.documentElement).toHaveAttribute('lang', 'en')
+    expect(localStorage.getItem('scibr:language')).toBe('en')
   })
 })

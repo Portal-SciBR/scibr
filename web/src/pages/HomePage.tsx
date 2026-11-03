@@ -9,6 +9,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CardItem } from '../components/CardItem'
 import { SearchFilters } from '../components/SearchFilters'
@@ -33,6 +34,7 @@ const gridSx = {
 }
 
 export function HomePage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const filters = parseFilters(params)
 
@@ -66,56 +68,34 @@ export function HomePage() {
           gutterBottom
           sx={{ fontSize: { xs: '1.9rem', sm: '3rem' } }}
         >
-          A ciência brasileira, num só lugar
+          {t('home.title')}
         </Typography>
-        <Typography color="text.secondary">
-          Diretório aberto de artigos, podcasts, canais e portais de divulgação
-          científica.
-        </Typography>
+        <Typography color="text.secondary">{t('home.subtitle')}</Typography>
       </Box>
 
       <Paper variant="outlined" sx={{ p: 3 }} component="section">
         <Typography variant="h6" component="h2" gutterBottom>
-          Como publicar uma divulgação
+          {t('home.howToTitle')}
         </Typography>
         <Typography component="ol" sx={{ pl: 3, m: 0 }}>
-          <li>
-            Acesse a página <strong>Enviar</strong> pelo menu ou pelo botão
-            abaixo.
-          </li>
-          <li>
-            Preencha o <strong>título</strong>, um <strong>resumo</strong> de
-            até 500 caracteres, o <strong>link para a fonte</strong> (começando
-            com http:// ou https://), a área, o formato e o idioma.
-          </li>
-          <li>
-            Informe a instituição ou autor e, se quiser, até 8 tags para
-            facilitar a busca.
-          </li>
-          <li>
-            Preencha seu nome e e-mail, indique sua relação com o conteúdo e
-            aceite a Política de Privacidade.
-          </li>
-          <li>
-            Clique em <strong>Enviar para revisão</strong>. Sua divulgação só
-            fica visível depois de aprovada pela equipe.
-          </li>
+          <li>{t('home.step1')}</li>
+          <li>{t('home.step2')}</li>
+          <li>{t('home.step3')}</li>
+          <li>{t('home.step4')}</li>
+          <li>{t('home.step5')}</li>
         </Typography>
         <Stack direction="row" spacing={2} sx={{ mt: 2, flexWrap: 'wrap' }}>
           <Button variant="contained" component={Link} to="/enviar">
-            Enviar divulgação
+            {t('home.submitResource')}
           </Button>
           <Button component={Link} to="/diretrizes">
-            Ver diretrizes de curadoria
+            {t('home.viewGuidelines')}
           </Button>
         </Stack>
       </Paper>
 
       {!isSupabaseConfigured && (
-        <Alert severity="warning">
-          Supabase não configurado. Defina VITE_SUPABASE_URL e
-          VITE_SUPABASE_ANON_KEY em web/.env.
-        </Alert>
+        <Alert severity="warning">{t('home.supabaseWarning')}</Alert>
       )}
 
       <SearchFilters
@@ -132,15 +112,15 @@ export function HomePage() {
           <Alert
             severity="error"
             action={
-              <Button onClick={() => cards.refetch()}>Tentar de novo</Button>
+              <Button onClick={() => cards.refetch()}>{t('home.retry')}</Button>
             }
           >
-            Não foi possível carregar as divulgações.
+            {t('home.loadError')}
           </Alert>
         )}
         {cards.data && (
           <Typography variant="body2" color="text.secondary">
-            {total} {total === 1 ? 'resultado' : 'resultados'}
+            {t('home.results', { count: total })}
           </Typography>
         )}
       </Box>
@@ -154,8 +134,8 @@ export function HomePage() {
       ) : cards.data && cards.data.items.length === 0 ? (
         <Alert severity="info">
           {hasActiveFilters(filters)
-            ? 'Nenhuma divulgação encontrada com esses filtros.'
-            : 'Ainda não há divulgações publicadas.'}
+            ? t('home.noFilteredResults')
+            : t('home.noResources')}
         </Alert>
       ) : (
         <Box sx={gridSx}>
@@ -178,6 +158,14 @@ export function HomePage() {
           sx={{ alignSelf: 'center' }}
           siblingCount={0}
           size="small"
+          aria-label={t('home.pagination')}
+          getItemAriaLabel={(type, page) => {
+            if (type === 'first') return t('home.firstPage')
+            if (type === 'last') return t('home.lastPage')
+            if (type === 'next') return t('home.nextPage')
+            if (type === 'previous') return t('home.previousPage')
+            return t('home.page', { page })
+          }}
           count={pages}
           page={filters.page}
           onChange={(_, page) => {

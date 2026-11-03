@@ -8,6 +8,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import type { Card } from '../lib/types'
 import { SubmitterInfo } from './SubmitterInfo'
 
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function CardItem({ card, onTagClick }: Props) {
+  const { t } = useTranslation()
   return (
     <MuiCard
       component="article"
@@ -29,8 +31,16 @@ export function CardItem({ card, onTagClick }: Props) {
           spacing={1}
           sx={{ mb: 1, flexWrap: 'wrap', rowGap: 1 }}
         >
-          <Chip size="small" color="primary" label={card.area} />
-          <Chip size="small" variant="outlined" label={card.formato} />
+          <Chip
+            size="small"
+            color="primary"
+            label={t(`domain.areas.${card.area}`)}
+          />
+          <Chip
+            size="small"
+            variant="outlined"
+            label={t(`domain.formats.${card.formato}`)}
+          />
         </Stack>
         <Typography variant="h6" component="h2" gutterBottom>
           {card.titulo}
@@ -63,9 +73,9 @@ export function CardItem({ card, onTagClick }: Props) {
           endIcon={<OpenInNewIcon />}
           variant="contained"
           size="small"
-          aria-label={`Acessar fonte: ${card.titulo}`}
+          aria-label={t('card.accessSourceAria', { title: card.titulo })}
         >
-          Acessar fonte
+          {t('card.accessSource')}
         </Button>
       </CardActions>
     </MuiCard>

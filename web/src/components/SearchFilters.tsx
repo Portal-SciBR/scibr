@@ -11,6 +11,7 @@ import {
   TextField,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { hasActiveFilters } from '../lib/filters'
 import { useDebounced } from '../lib/useDebounced'
 import { AREAS, FORMATOS, IDIOMAS, type Filters } from '../lib/types'
@@ -28,6 +29,7 @@ export function SearchFilters({
   onChange,
   onReset,
 }: Props) {
+  const { t } = useTranslation()
   const [text, setText] = useState(filters.q)
   const debounced = useDebounced(text)
 
@@ -47,8 +49,8 @@ export function SearchFilters({
       <TextField
         fullWidth
         type="search"
-        label="Buscar divulgações"
-        placeholder="Ex: astronomia, podcast, Fiocruz…"
+        label={t('search.label')}
+        placeholder={t('search.placeholder')}
         value={text}
         onChange={(e) => setText(e.target.value)}
         slotProps={{
@@ -61,7 +63,7 @@ export function SearchFilters({
             endAdornment: text ? (
               <InputAdornment position="end">
                 <IconButton
-                  aria-label="Limpar busca"
+                  aria-label={t('search.clear')}
                   onClick={() => setText('')}
                   edge="end"
                 >
@@ -86,74 +88,81 @@ export function SearchFilters({
         <TextField
           select
           size="small"
-          label="Área do conhecimento"
+          label={t('search.area')}
           value={filters.area}
           onChange={(e) =>
             onChange({ area: e.target.value as Filters['area'] })
           }
         >
-          <MenuItem value="">Todas</MenuItem>
+          <MenuItem value="">{t('search.allAreas')}</MenuItem>
           {AREAS.map((a) => (
             <MenuItem key={a} value={a}>
-              {a}
+              {t(`domain.areas.${a}`)}
             </MenuItem>
           ))}
         </TextField>
         <TextField
           select
           size="small"
-          label="Formato"
+          label={t('search.format')}
           value={filters.formato}
           onChange={(e) =>
             onChange({ formato: e.target.value as Filters['formato'] })
           }
         >
-          <MenuItem value="">Todos</MenuItem>
+          <MenuItem value="">{t('search.allFormats')}</MenuItem>
           {FORMATOS.map((f) => (
             <MenuItem key={f} value={f}>
-              {f}
+              {t(`domain.formats.${f}`)}
             </MenuItem>
           ))}
         </TextField>
         <TextField
           select
           size="small"
-          label="Idioma"
+          label={t('search.language')}
           value={filters.idioma}
           onChange={(e) => onChange({ idioma: e.target.value })}
         >
-          <MenuItem value="">Todos</MenuItem>
+          <MenuItem value="">{t('search.allLanguages')}</MenuItem>
           {IDIOMAS.map((i) => (
             <MenuItem key={i.value} value={i.value}>
-              {i.label}
+              {t(`domain.languages.${i.value}`)}
             </MenuItem>
           ))}
         </TextField>
         <TextField
           select
           size="small"
-          label="Ordenar por"
+          label={t('search.sort')}
           value={filters.sort}
           onChange={(e) =>
             onChange({ sort: e.target.value as Filters['sort'] })
           }
         >
-          <MenuItem value="relevance">Relevância</MenuItem>
-          <MenuItem value="recent">Mais recentes</MenuItem>
+          <MenuItem value="relevance">{t('search.relevance')}</MenuItem>
+          <MenuItem value="recent">{t('search.recent')}</MenuItem>
         </TextField>
       </Box>
       <Autocomplete
         multiple
         size="small"
+        clearText={t('search.autocomplete.clear')}
+        closeText={t('search.autocomplete.close')}
+        noOptionsText={t('search.autocomplete.noOptions')}
+        openText={t('search.autocomplete.open')}
+        loadingText={t('search.autocomplete.loading')}
         options={availableTags}
         value={filters.tags}
         onChange={(_, tags) => onChange({ tags })}
-        renderInput={(params) => <TextField {...params} label="Tags" />}
+        renderInput={(params) => (
+          <TextField {...params} label={t('search.tags')} />
+        )}
       />
       {hasActiveFilters(filters) && (
         <Box>
           <Button size="small" onClick={onReset}>
-            Limpar filtros
+            {t('search.clearFilters')}
           </Button>
         </Box>
       )}

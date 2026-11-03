@@ -14,12 +14,25 @@ export interface RevealedContact {
   telefone: string | null
 }
 
+export type ApiErrorCode =
+  'contactRateLimited' | 'contactUnavailable' | 'duplicateLink' | 'submitFailed'
+
+export class ApiError extends Error {
+  readonly code: ApiErrorCode
+
+  constructor(code: ApiErrorCode) {
+    super(code)
+    this.name = 'ApiError'
+    this.code = code
+  }
+}
+
 export async function revealContact(id: string): Promise<RevealedContact> {
   const { data, error } = await supabase.rpc('reveal_contact', { p_id: id })
   if (error) {
     if (error.message.includes('rate_limited'))
-      throw new Error('Muitas consultas seguidas. Tente novamente mais tarde.')
-    throw new Error('Não foi possível obter o contato agora.')
+      throw new ApiError('contactRateLimited')
+    throw new ApiError('contactUnavailable')
   }
   const row = (data as RevealedContact[] | null)?.[0]
   return { email: row?.email ?? null, telefone: row?.telefone ?? null }
@@ -99,11 +112,8 @@ export async function submitCard(
     status: 'pending',
   })
   if (error) {
-    if (error.code === '23505')
-      throw new Error('Este link já foi enviado ao portal.')
-    throw new Error(
-      'Não foi possível enviar agora. Tente novamente em instantes.',
-    )
+    if (error.code === '23505') throw new ApiError('duplicateLink')
+    throw new ApiError('submitFailed')
   }
 }
 
@@ -117,6 +127,23 @@ export async function listAdminCards(
   })
   if (error) throw error
   return (data ?? []) as AdminCard[]
+}
+
+export async function fetchPendingCardsCount(): Promise<number | null> {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession()
+  if (sessionError) throw sessionError
+  if (!session) return null
+  if (!(await isCurrentUserAdmin(session.user.id))) return null
+
+  const { data, error } = await supabase.rpc('pending_cards_count')
+  if (error) throw error
+  if (typeof data !== 'number' || !Number.isSafeInteger(data) || data < 0) {
+    throw new Error('Invalid pending cards count')
+  }
+  return data
 }
 
 export async function setCardStatus(

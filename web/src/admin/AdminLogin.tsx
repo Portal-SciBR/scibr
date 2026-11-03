@@ -1,8 +1,10 @@
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
 import { useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 
 export function AdminLogin() {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -16,7 +18,7 @@ export function AdminLogin() {
       email,
       password,
     })
-    if (error) setError('E-mail ou senha inválidos.')
+    if (error) setError(t('adminLogin.invalidCredentials'))
     setBusy(false)
   }
 
@@ -28,11 +30,11 @@ export function AdminLogin() {
       sx={{ maxWidth: 360, mx: 'auto' }}
     >
       <Typography variant="h5" component="h1">
-        Moderação
+        {t('adminLogin.title')}
       </Typography>
       {error && <Alert severity="error">{error}</Alert>}
       <TextField
-        label="E-mail"
+        label={t('adminLogin.email')}
         type="email"
         required
         value={email}
@@ -40,7 +42,7 @@ export function AdminLogin() {
         autoComplete="username"
       />
       <TextField
-        label="Senha"
+        label={t('adminLogin.password')}
         type="password"
         required
         value={password}
@@ -48,7 +50,7 @@ export function AdminLogin() {
         autoComplete="current-password"
       />
       <Button type="submit" variant="contained" disabled={busy}>
-        Entrar
+        {t('adminLogin.signIn')}
       </Button>
     </Stack>
   )
