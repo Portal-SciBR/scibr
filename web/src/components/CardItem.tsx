@@ -34,7 +34,7 @@ export function CardItem({ card, onTagClick }: Props) {
           <Chip
             size="small"
             color="primary"
-            label={t(`domain.areas.${card.area}`)}
+            label={t(`domain.areas.${card.area}`, { defaultValue: card.area })}
           />
           <Chip
             size="small"

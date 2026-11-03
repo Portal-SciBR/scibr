@@ -86,6 +86,23 @@ export async function fetchTags(): Promise<string[]> {
   return ((data ?? []) as { tag: string }[]).map((r) => r.tag)
 }
 
+export async function fetchAreas(): Promise<string[]> {
+  const { data, error } = await supabase.rpc('card_areas')
+  if (error) throw error
+  if (!Array.isArray(data)) throw new Error('Invalid area list')
+  return data.map((row) => {
+    if (
+      typeof row !== 'object' ||
+      row === null ||
+      !('area' in row) ||
+      typeof row.area !== 'string'
+    ) {
+      throw new Error('Invalid area list')
+    }
+    return row.area
+  })
+}
+
 export async function submitCard(
   input: SubmissionInput & EnviadorInput,
 ): Promise<void> {

@@ -161,7 +161,7 @@ function Moderation({ userId }: { userId: string }) {
             <Chip
               size="small"
               variant="outlined"
-              label={t(`domain.areas.${c.area}`)}
+              label={t(`domain.areas.${c.area}`, { defaultValue: c.area })}
             />
             <Chip
               size="small"

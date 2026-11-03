@@ -7,6 +7,7 @@ Qualquer pessoa envia conteúdo pelo site, sem login. Moderadores aprovam cada c
 ## Funcionalidades
 
 - Busca full-text em português (sem distinção de acentos) e filtros por tema, formato e tags.
+- Envios podem propor novas áreas do conhecimento, disponíveis nos filtros antes da revisão do card.
 - Interface disponível em português e inglês, com preferência de idioma salva no navegador.
 - Envio de cards com identificação do enviador (nome, relação, redes e contato).
 - E-mail e telefone ficam ocultos e só são revelados por ação do visitante, com limite de consultas por IP.

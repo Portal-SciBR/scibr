@@ -1,4 +1,4 @@
-import { AREAS, FORMATOS, type Filters, type Sort } from './types'
+import { FORMATOS, type Filters, type Sort } from './types'
 
 export const DEFAULT_FILTERS: Filters = {
   q: '',
@@ -16,9 +16,7 @@ export function parseFilters(params: URLSearchParams): Filters {
   const page = Number.parseInt(params.get('page') ?? '1', 10)
   return {
     q: params.get('q') ?? '',
-    area: (AREAS as readonly string[]).includes(area)
-      ? (area as Filters['area'])
-      : '',
+    area: area.trim().length <= 80 ? area.trim() : '',
     formato: (FORMATOS as readonly string[]).includes(formato)
       ? (formato as Filters['formato'])
       : '',

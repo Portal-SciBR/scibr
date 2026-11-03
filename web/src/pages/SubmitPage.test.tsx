@@ -23,4 +23,25 @@ describe('SubmitPage', () => {
     await user.type(screen.getByRole('textbox', { name: 'Resumo' }), 'abc123')
     expect(screen.getByText('6 / 500 caracteres')).toBeInTheDocument()
   })
+
+  it('accepts a new subject area typed into the field', async () => {
+    const user = userEvent.setup()
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <SubmitPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    const area = screen.getByRole('combobox', {
+      name: 'Área do conhecimento',
+    })
+    await user.type(area, 'Oceanografia')
+
+    expect(area).toHaveValue('Oceanografia')
+  })
 })
