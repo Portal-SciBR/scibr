@@ -79,4 +79,9 @@ describe('CardItem', () => {
     expect(document.documentElement).toHaveAttribute('lang', 'en')
     expect(localStorage.getItem('scibr:language')).toBe('en')
   })
+
+  it('displays custom areas without a missing translation key', () => {
+    render(<CardItem card={{ ...base, area: 'Oceanografia' }} />)
+    expect(screen.getByText('Oceanografia')).toBeInTheDocument()
+  })
 })

@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -87,18 +88,34 @@ export function EditCardDialog({ card, onClose, onSave }: Props) {
             value={form.link_original}
             onChange={set('link_original')}
           />
-          <TextField
-            select
-            label={t('editDialog.area')}
+          <Autocomplete
+            freeSolo
+            options={AREAS}
             value={form.area}
-            onChange={set('area')}
-          >
-            {AREAS.map((a) => (
-              <MenuItem key={a} value={a}>
-                {t(`domain.areas.${a}`)}
-              </MenuItem>
-            ))}
-          </TextField>
+            onChange={(_, value) =>
+              setForm((f) => ({ ...f, area: value ?? '' }))
+            }
+            onInputChange={(_, value, reason) => {
+              if (reason === 'input') setForm((f) => ({ ...f, area: value }))
+            }}
+            getOptionLabel={(option) =>
+              t(`domain.areas.${option}`, { defaultValue: option })
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={t('editDialog.area')}
+                helperText={t('submit.areaHelp')}
+                slotProps={{
+                  ...params.slotProps,
+                  htmlInput: {
+                    ...params.slotProps.htmlInput,
+                    maxLength: 80,
+                  },
+                }}
+              />
+            )}
+          />
           <TextField
             select
             label={t('editDialog.format')}

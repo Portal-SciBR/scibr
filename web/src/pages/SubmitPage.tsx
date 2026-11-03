@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -14,12 +15,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
-import { ApiError, submitCard } from '../lib/api'
+import { ApiError, fetchAreas, submitCard } from '../lib/api'
 import {
   RELACOES,
   enviadorSchemaFor,
@@ -28,6 +29,7 @@ import {
   submissionSchemaFor,
   withHttps,
 } from '../lib/schemas'
+import { isSupabaseConfigured } from '../lib/supabase'
 import { AREAS, FORMATOS, IDIOMAS } from '../lib/types'
 
 const createFormSchema = (t: (key: string) => string) =>
@@ -73,6 +75,12 @@ const defaults: FormValues = {
 
 export function SubmitPage() {
   const { t } = useTranslation()
+  const areas = useQuery({
+    queryKey: ['areas'],
+    queryFn: fetchAreas,
+    enabled: isSupabaseConfigured,
+  })
+  const areaOptions = [...new Set([...AREAS, ...(areas.data ?? [])])]
   const formSchema = createFormSchema(t)
   // Normaliza @usuario e links sem https antes de validar.
   const normalize = (v: FormValues): FormValues => ({
@@ -180,20 +188,40 @@ export function SubmitPage() {
           name="area"
           control={control}
           render={({ field }) => (
-            <TextField
-              select
-              required
-              label={t('submit.area')}
-              {...field}
-              error={!!errors.area}
-              helperText={errors.area?.message}
-            >
-              {AREAS.map((a) => (
-                <MenuItem key={a} value={a}>
-                  {t(`domain.areas.${a}`)}
-                </MenuItem>
-              ))}
-            </TextField>
+            <Autocomplete
+              freeSolo
+              options={areaOptions}
+              value={field.value || null}
+              loading={areas.isLoading}
+              onChange={(_, value) => field.onChange(value ?? '')}
+              onInputChange={(_, value, reason) => {
+                if (reason === 'input') field.onChange(value)
+              }}
+              getOptionLabel={(option) =>
+                t(`domain.areas.${option}`, { defaultValue: option })
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  label={t('submit.area')}
+                  error={!!errors.area}
+                  helperText={
+                    errors.area?.message ??
+                    (areas.isError
+                      ? t('submit.areaLoadError')
+                      : t('submit.areaHelp'))
+                  }
+                  slotProps={{
+                    ...params.slotProps,
+                    htmlInput: {
+                      ...params.slotProps.htmlInput,
+                      maxLength: 80,
+                    },
+                  }}
+                />
+              )}
+            />
           )}
         />
         <Controller

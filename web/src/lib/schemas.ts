@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { AREAS, FORMATOS } from './types'
+import { FORMATOS } from './types'
 
 type Translate = (key: string) => string
 
@@ -15,7 +15,11 @@ export const submissionSchemaFor = (t: Translate) =>
       .trim()
       .min(10, t('validation.min10'))
       .max(500, t('validation.max500')),
-    area: z.enum(AREAS, { error: t('validation.selectArea') }),
+    area: z
+      .string()
+      .trim()
+      .min(2, t('validation.categoryRequired'))
+      .max(80, t('validation.categoryMax')),
     formato: z.enum(FORMATOS, { error: t('validation.selectFormat') }),
     instituicao_autor: z.string().trim().max(120, t('validation.max120')),
     tags: z

@@ -22,7 +22,7 @@ export const IDIOMAS = [
   { value: 'es', label: 'Espanhol' },
 ] as const
 
-export type Area = (typeof AREAS)[number]
+export type Area = string
 export type Formato = (typeof FORMATOS)[number]
 export type Status = 'pending' | 'approved' | 'rejected'
 export type Sort = 'relevance' | 'recent'

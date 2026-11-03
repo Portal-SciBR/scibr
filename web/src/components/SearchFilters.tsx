@@ -19,6 +19,7 @@ import { AREAS, FORMATOS, IDIOMAS, type Filters } from '../lib/types'
 interface Props {
   filters: Filters
   availableTags: string[]
+  availableAreas: string[]
   onChange: (patch: Partial<Filters>) => void
   onReset: () => void
 }
@@ -26,10 +27,12 @@ interface Props {
 export function SearchFilters({
   filters,
   availableTags,
+  availableAreas,
   onChange,
   onReset,
 }: Props) {
   const { t } = useTranslation()
+  const areaOptions = [...new Set([...AREAS, ...availableAreas])]
   const [text, setText] = useState(filters.q)
   const debounced = useDebounced(text)
 
@@ -95,9 +98,9 @@ export function SearchFilters({
           }
         >
           <MenuItem value="">{t('search.allAreas')}</MenuItem>
-          {AREAS.map((a) => (
+          {areaOptions.map((a) => (
             <MenuItem key={a} value={a}>
-              {t(`domain.areas.${a}`)}
+              {t(`domain.areas.${a}`, { defaultValue: a })}
             </MenuItem>
           ))}
         </TextField>

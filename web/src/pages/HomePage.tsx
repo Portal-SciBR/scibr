@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CardItem } from '../components/CardItem'
 import { SearchFilters } from '../components/SearchFilters'
-import { fetchTags, searchCards } from '../lib/api'
+import { fetchAreas, fetchTags, searchCards } from '../lib/api'
 import {
   DEFAULT_FILTERS,
   hasActiveFilters,
@@ -54,6 +54,11 @@ export function HomePage() {
     queryFn: fetchTags,
     enabled: isSupabaseConfigured,
     staleTime: 5 * 60_000,
+  })
+  const areas = useQuery({
+    queryKey: ['areas'],
+    queryFn: fetchAreas,
+    enabled: isSupabaseConfigured,
   })
 
   const total = cards.data?.total ?? 0
@@ -97,10 +102,14 @@ export function HomePage() {
       {!isSupabaseConfigured && (
         <Alert severity="warning">{t('home.supabaseWarning')}</Alert>
       )}
+      {areas.isError && (
+        <Alert severity="error">{t('search.areasLoadError')}</Alert>
+      )}
 
       <SearchFilters
         filters={filters}
         availableTags={tags.data ?? []}
+        availableAreas={areas.data ?? []}
         onChange={update}
         onReset={() =>
           setParams(serializeFilters(DEFAULT_FILTERS), { replace: true })

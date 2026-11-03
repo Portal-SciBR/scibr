@@ -19,9 +19,15 @@ describe('filters', () => {
     expect(parseFilters(serializeFilters(f))).toEqual(f)
   })
 
+  it('preserves custom areas in the URL', () => {
+    const f = parseFilters(new URLSearchParams('area=Oceanografia'))
+    expect(f.area).toBe('Oceanografia')
+    expect(parseFilters(serializeFilters(f)).area).toBe('Oceanografia')
+  })
+
   it('ignores invalid values', () => {
     const f = parseFilters(
-      new URLSearchParams('area=x&formato=y&page=-2&sort=zzz'),
+      new URLSearchParams(`area=${'x'.repeat(81)}&formato=y&page=-2&sort=zzz`),
     )
     expect(f).toMatchObject({
       area: '',
@@ -46,6 +52,15 @@ describe('submission', () => {
 
   it('accepts valid data', () => {
     expect(submissionSchema.safeParse(valid).success).toBe(true)
+  })
+
+  it('accepts a custom area and rejects values longer than 80 characters', () => {
+    expect(
+      submissionSchema.safeParse({ ...valid, area: 'Oceanografia' }).success,
+    ).toBe(true)
+    expect(
+      submissionSchema.safeParse({ ...valid, area: 'x'.repeat(81) }).success,
+    ).toBe(false)
   })
 
   it('rejects non-http links', () => {
