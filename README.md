@@ -7,6 +7,7 @@ Qualquer pessoa envia conteúdo pelo site, sem login. Moderadores aprovam cada c
 ## Funcionalidades
 
 - Busca full-text em português (sem distinção de acentos) e filtros por tema, formato e tags.
+- Interface disponível em português e inglês, com preferência de idioma salva no navegador.
 - Envio de cards com identificação do enviador (nome, relação, redes e contato).
 - E-mail e telefone ficam ocultos e só são revelados por ação do visitante, com limite de consultas por IP.
 - Moderação: aprovar, rejeitar, editar, excluir e apagar os dados pessoais do enviador.
@@ -15,7 +16,7 @@ Qualquer pessoa envia conteúdo pelo site, sem login. Moderadores aprovam cada c
 
 ## Stack
 
-Vite + React + TypeScript + MUI · TanStack Query · Supabase (Postgres, RLS, Auth, busca full-text).
+Vite + React + TypeScript + MUI · TanStack Query · i18next · Supabase (Postgres, RLS, Auth, busca full-text).
 
 ## Estrutura
 
