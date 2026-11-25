@@ -91,6 +91,7 @@
     "title": "Submit a resource",
     "intro": "Anyone can suggest content. It will become visible after review by the team. We do not host the material; we link to its original source.",
     "success": "Received! Your resource will be reviewed before publication.",
+    "successNotificationFailed": "Your resource was received, but the team could not be notified by email. Please contact us to confirm the review.",
     "titleField": "Title",
     "summary": "Summary",
     "summaryHelp": "{{count}} / 500 characters",

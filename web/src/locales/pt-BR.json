@@ -91,6 +91,7 @@
     "title": "Enviar divulgação",
     "intro": "Qualquer pessoa pode sugerir um conteúdo. Ele ficará visível após revisão da equipe. Não hospedamos o material: apenas direcionamos para a fonte original.",
     "success": "Recebido! Sua divulgação será revisada antes de ser publicada.",
+    "successNotificationFailed": "Sua divulgação foi recebida, mas não foi possível avisar a equipe por e-mail. Entre em contato para confirmar a revisão.",
     "titleField": "Título",
     "summary": "Resumo",
     "summaryHelp": "{{count}} / 500 caracteres",

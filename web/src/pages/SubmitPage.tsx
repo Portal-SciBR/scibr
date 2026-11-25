@@ -113,14 +113,13 @@ export function SubmitPage() {
       }
       // Honeypot preenchido: finge sucesso sem gravar.
       if (v.website) return
-      const {
-        tagsRaw,
-        website: _website,
-        consentimento: _consentimento,
-        ...rest
-      } = v
-      await submitCard({ ...rest, tags: parseTags(tagsRaw) })
+      const { tagsRaw, website: _website, ...rest } = v
+      const result = await submitCard({
+        ...rest,
+        tags: parseTags(tagsRaw),
+      })
       localStorage.setItem(COOLDOWN_KEY, String(Date.now()))
+      return result
     },
     onSuccess: () => {
       reset(defaults)
@@ -137,8 +136,16 @@ export function SubmitPage() {
         <Typography color="text.secondary">{t('submit.intro')}</Typography>
       </Box>
 
-      {mutation.isSuccess && (
-        <Alert severity="success">{t('submit.success')}</Alert>
+      {mutation.isSuccess && mutation.data && (
+        <Alert
+          severity={mutation.data.notificationSent ? 'success' : 'warning'}
+        >
+          {t(
+            mutation.data.notificationSent
+              ? 'submit.success'
+              : 'submit.successNotificationFailed',
+          )}
+        </Alert>
       )}
       {mutation.isError && (
         <Alert severity="error">
