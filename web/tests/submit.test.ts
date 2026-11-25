@@ -16,7 +16,7 @@ vi.mock('nodemailer', () => ({
   default: { createTransport },
 }))
 
-import handler from './submit'
+import handler from '../api/submit'
 
 const validSubmission = {
   titulo: 'Astronomia para todos',

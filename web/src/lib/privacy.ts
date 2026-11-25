@@ -2,4 +2,4 @@
 export const PRIVACY_VERSION = '2026-11-01'
 
 export const PRIVACY_EMAIL =
-  (import.meta.env.VITE_PRIVACY_EMAIL as string | undefined) ?? ''
+  (import.meta.env?.VITE_PRIVACY_EMAIL as string | undefined) ?? ''
