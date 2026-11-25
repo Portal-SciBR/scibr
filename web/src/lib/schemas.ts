@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { FORMATOS } from './types'
+import { FORMATOS } from './types.js'
 
 type Translate = (key: string) => string
 

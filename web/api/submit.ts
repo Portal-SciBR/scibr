@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import nodemailer from 'nodemailer'
 import { z } from 'zod'
-import { enviadorSchema, submissionSchema } from '../src/lib/schemas'
-import { PRIVACY_VERSION } from '../src/lib/privacy'
+import { enviadorSchema, submissionSchema } from '../src/lib/schemas.js'
+import { PRIVACY_VERSION } from '../src/lib/privacy.js'
 
 const requestSchema = submissionSchema
   .merge(enviadorSchema)
