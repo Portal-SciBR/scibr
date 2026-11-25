@@ -7,7 +7,6 @@ import {
   type Status,
 } from './types'
 import type { EnviadorInput, SubmissionInput } from './schemas'
-import { PRIVACY_VERSION } from './privacy'
 
 export interface RevealedContact {
   email: string | null
@@ -104,34 +103,45 @@ export async function fetchAreas(): Promise<string[]> {
 }
 
 export async function submitCard(
-  input: SubmissionInput & EnviadorInput,
-): Promise<void> {
-  const nul = (v: string) => v || null
-  const { error } = await supabase.from('cards').insert({
-    titulo: input.titulo,
-    descricao: input.descricao,
-    area: input.area,
-    formato: input.formato,
-    instituicao_autor: input.instituicao_autor || null,
-    tags: input.tags,
-    link_original: input.link_original,
-    idioma: input.idioma,
-    enviador_nome: input.enviador_nome,
-    enviador_email: input.enviador_email,
-    enviador_relacao: input.enviador_relacao,
-    enviador_telefone: nul(input.enviador_telefone),
-    enviador_instagram: nul(input.enviador_instagram),
-    enviador_x: nul(input.enviador_x),
-    enviador_youtube: nul(input.enviador_youtube),
-    enviador_linkedin: nul(input.enviador_linkedin),
-    enviador_site: nul(input.enviador_site),
-    consentimento_versao: PRIVACY_VERSION,
-    status: 'pending',
-  })
-  if (error) {
-    if (error.code === '23505') throw new ApiError('duplicateLink')
+  input: SubmissionInput & EnviadorInput & { consentimento: true },
+): Promise<{ notificationSent: boolean }> {
+  let response: Response
+  try {
+    response = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    })
+  } catch {
     throw new ApiError('submitFailed')
   }
+
+  let result: unknown
+  try {
+    result = await response.json()
+  } catch {
+    throw new ApiError('submitFailed')
+  }
+
+  if (!response.ok) {
+    const isDuplicate =
+      typeof result === 'object' &&
+      result !== null &&
+      'error' in result &&
+      result.error === 'duplicateLink'
+    throw new ApiError(isDuplicate ? 'duplicateLink' : 'submitFailed')
+  }
+
+  if (
+    typeof result !== 'object' ||
+    result === null ||
+    !('notificationSent' in result) ||
+    typeof result.notificationSent !== 'boolean'
+  ) {
+    throw new ApiError('submitFailed')
+  }
+
+  return { notificationSent: result.notificationSent }
 }
 
 export async function listAdminCards(
